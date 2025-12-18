@@ -6,8 +6,6 @@
     "ingestor",
     "scrapper",
     "leetcode",
-    "algorithm",
-    "problem",
     "sqlite",
     "graphql",
     "learning"
@@ -25,13 +23,32 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
+    "prepare": "husky",
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "node --loader ts-node/esm src/index.ts",
-    "lint": "npx eslint"
+    "lint": "eslint .",
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,json,css,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "eslint": "^9.39.2",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "@types/sqlite3": "^3.1.11",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
+    "globals": "^16.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
