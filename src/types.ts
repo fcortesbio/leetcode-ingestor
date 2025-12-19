@@ -14,4 +14,5 @@ export interface GraphQLResponse {
       questions: LeetCodeQuestion[];
     };
   };
+  errors?: Array<{ message: string; [key: string]: unknown }>;
 }
