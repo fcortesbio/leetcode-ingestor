@@ -1,6 +1,11 @@
 import sqlite3 from 'sqlite3';
 import type { LeetCodeQuestion } from './types.js';
 
+// Standardize to 4-digit padding for 3363+ problems
+const paddedId = (rawId: string) => {
+  return String(rawId).padStart(4, '0');
+};
+
 export class LeetCodeDatabase {
   private database: sqlite3.Database;
 
@@ -54,7 +59,7 @@ export class LeetCodeDatabase {
 
         for (const question of questions) {
           statement.run([
-            question.questionFrontendId,
+            paddedId(question.questionFrontendId),
             question.title,
             question.titleSlug,
             question.difficulty,
