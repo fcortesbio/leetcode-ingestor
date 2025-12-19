@@ -1,39 +1,49 @@
 import { LeetCodeService } from './leetcode.js';
-
-const leetcode = new LeetCodeService();
+import { LeetCodeDatabase } from './database.js';
 
 async function main() {
-  try {
-    console.log('--- LeetCode GraphQL API ---');
-    // Fetch a tiny chunk (2 problems) to minimize noise
-    const questions = await leetcode.fetchAlgorithmProblems(2, 0);
+  const db = new LeetCodeDatabase('leetcode_vault.db');
+  const leetcode = new LeetCodeService();
 
-    if (questions.length > 0) {
-      console.log('Success! Received data from API:');
-      console.table(questions); // Visualizes the array nicely in the terminal
-    } else {
-      console.warn('API returned successfully but questions array is empty.');
+  const BATCH_SIZE = 7;
+
+  async function sync() {
+    try {
+      // 1. Initialize the database and check current state
+      await db.initialize();
+      const currentCount = await db.getProblemCount();
+      console.log(`Current local database count: ${currentCount}`);
+
+      // 2. Fetch the "Next" chunk of problems from LeetCode
+      console.log(
+        `Fetching next ${BATCH_SIZE} algoritms (offset: ${currentCount})...`,
+      );
+      const questions = await leetcode.fetchAlgorithmProblems(
+        BATCH_SIZE,
+        currentCount,
+      );
+
+      if (questions.length === 0) {
+        console.log('No new problems found. Exiting...');
+        return;
+      }
+
+      // 3. Persist to SQLite database
+      await db.upsertQuestions(questions);
+
+      // 4. Verification
+      const newCount = await db.getProblemCount();
+      console.log(
+        `Succesfully ingested ${questions.length} problems. New total: ${newCount}`,
+      );
+    } catch (error) {
+      console.error('Error syncing LeetCode problems:', error);
+      process.exit(1);
     }
-  } catch (error) {
-    console.error('Error:', error);
   }
+
+  // Run the sync process
+  await sync();
 }
+
 main().catch(console.error);
-
-// async function test() {
-//   await db.initialize();
-//   console.log('DB Initialized.');
-
-//   await db.upsertQuestions([
-//     {
-//       questionFrontendId: '1',
-//       title: 'Two Sum',
-//       titleSlug: 'two-sum',
-//       difficulty: 'Easy',
-//       isPaidOnly: false,
-//     },
-//   ]);
-//   console.log('Mock data ingested.');
-// }
-
-// // test().catch(console.error);

@@ -19,13 +19,29 @@ export class LeetCodeDatabase {
                 status TEXT NOT NULL DEFAULT 'pending'
             );
         `;
-
     return new Promise((resolve, reject) => {
       this.database.run(schema, (err) => {
         err ? reject(err) : resolve();
       });
     });
   }
+
+  public async getProblemCount(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      // Added 'AS count' so the result object has a property named 'count'
+      this.database.get(
+        'SELECT COUNT(*) AS count FROM problems',
+        (err, row) => {
+          if (err) return reject(err);
+
+          // Now row is { count: X }
+          const result = row as { count: number } | undefined;
+          resolve(result?.count || 0);
+        },
+      );
+    });
+  }
+
   public async upsertQuestions(questions: LeetCodeQuestion[]): Promise<void> {
     return new Promise((resolve, reject) => {
       this.database.serialize(() => {
